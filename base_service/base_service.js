@@ -118,7 +118,6 @@ class BaseService {
 
             const query = baseQuery + ` LIMIT ? OFFSET ?`;
             const [rows] = await database.pool.query(query, [...params, limit, offset]);
-            
             return {
                 content: rows,
                 pagination: {

@@ -109,8 +109,7 @@ class ReviewRepository extends BaseService {
         p.title, p.description, p.price, p.created_at, p.updated_at
         ORDER BY pr.created_at DESC
         `;
-
-    const rows = await this.paginateRawQuery(query,page,limit,params);
+    const rows = await this.paginateRawQuery(query,Number(page),Number(limit),params);
     
     return rows;
 }

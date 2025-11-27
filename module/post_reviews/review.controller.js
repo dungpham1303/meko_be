@@ -73,7 +73,8 @@ const getListReviewByPostIdOrUserId = async(req,res)=>{
         if(req.query.tab!='myPosts' && req.query.tab!='myComments'){
             return ResponseUtile.validationErrorResponse(res, 'Tham số tab không hợp lệ');
         }
-        const review = await ReviewService.getListReviewByPostIdOrUserId({userId:req.query.userId,tab:req.query.tab,page:req.query.page,limit:req.query.limit});
+        
+        const review = await ReviewService.getListReviewByPostIdOrUserId({userId:req.query.userId,tab:req.query.tab,page:req.query.page,limit:req.query.size});
         for(let i=0;i<review.content.length;i++){
             review.content[i].images_post = review.content[i].images_post 
             ? String(review.content[i].images_post).split(',') 
