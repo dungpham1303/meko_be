@@ -1,6 +1,7 @@
 let currentPage = 0;
 let pageSize = parseInt($('#page-size-selector').val());
 let searchText = '';
+let inputStatus = $('#input_search_status').val();
 
 function formatDate(isoString) {
     if (!isoString) return '';
@@ -11,7 +12,7 @@ function formatDate(isoString) {
     return `${day}/${month}/${year}`;
 }
 
-function loadPost(page=0, size=pageSize,searchText = '') {
+function loadPost(page=0, size=pageSize,searchText = '',status = inputStatus) {
     Swal.fire({
         title: 'Đang xử lý...',
         allowOutsideClick: false,
@@ -29,7 +30,8 @@ function loadPost(page=0, size=pageSize,searchText = '') {
             'Authorization': sessionStorage.getItem('token')
         },
         data: JSON.stringify({
-            searchText: searchText
+            searchText: searchText,
+            status: status
         }),
         success: function(res) {
             Swal.close();
@@ -60,7 +62,9 @@ function loadPost(page=0, size=pageSize,searchText = '') {
                         <td>${post.price}</td>
                         <td>
                             ${
-                                post.status === "VIOLATION" 
+                                post.status === "EXPIRED" 
+                                ? '<span class="label label-pill label-inline mr-2" style="background-color: #CC66FF;">Hết hạn</span>'
+                                : post.status === "VIOLATION" 
                                 ? '<span class="label label-danger label-pill label-inline mr-2">Vi phạm</span>'
                                 : post.status === "APPROVED"
                                 ? '<span class="label label-success label-pill label-inline mr-2">Phê duyệt</span>'
@@ -121,19 +125,19 @@ function loadPost(page=0, size=pageSize,searchText = '') {
 $('#prev-page').on('click', function() {
     if (currentPage > 0) {
         currentPage--;
-        loadPost(currentPage, pageSize, searchText);
+        loadPost(currentPage, pageSize, searchText, inputStatus);
     }
 });
 
 $('#next-page').on('click', function() {
     currentPage++;
-    loadPost(currentPage, pageSize, searchText);
+    loadPost(currentPage, pageSize, searchText, inputStatus);
 });
 
 $('#page-size-selector').on('change', function() {
     pageSize = parseInt($(this).val());
     currentPage = 0;
-    loadPost(currentPage, pageSize, searchText);
+    loadPost(currentPage, pageSize, searchText, inputStatus);
 });
 
 $(document).ready(function() {
@@ -378,13 +382,15 @@ $(document).ready(function() {
         e.preventDefault();
 
         const searchText = $('#input_search').val().trim();
+        const status = $('#input_search_status').val();
         currentPage = 0;
-        loadPost(currentPage, pageSize, searchText);
+        loadPost(currentPage, pageSize, searchText, status);
     });
 
     $(document).on('click', '#kt_reset_4', function(e) {
         e.preventDefault();
         $('#input_search').val('');
+        $('#input_search_status').val('');
         searchText = '';
         loadPost(currentPage, pageSize, searchText);
     });
