@@ -35,6 +35,13 @@ function loadPackages() {
                     <tr style="line-height: 100px;">
                         <td>${package.id}</td>
                         <td>${package.name}</td>
+                        <td>
+                            ${
+                                package.status == 0
+                                ? '<span class="label label-success label-pill label-inline mr-2">Miễn phí</span>'
+                                : '<span class="label label-danger label-pill label-inline mr-2">Tính phí</span>'
+                            }
+                        </td>
                         <td>${formatNumberDisplay(package.price)}</td>
                         <td>${package.description}</td>
                         <td>${formatNumberDisplay(package.duration_days)}</td>
@@ -93,7 +100,8 @@ function addPackage() {
             description: $('#description_package').val(),
             price: parseFormattedNumber($('#price_package').val()),
             durationDays: parseFormattedNumber($('#duration_days').val()),
-            usageLimit: parseFormattedNumber($('#usage_limit').val())
+            usageLimit: parseFormattedNumber($('#usage_limit').val()),
+            status: $('#status_post_edit').val()
         }),
         
         headers: {
@@ -158,6 +166,13 @@ $(document).ready(function() {
                         <label>Giới hạn bài đăng:</label>
                         <input id="usage_limit" type="text" class="form-control" placeholder="Nhập số lượng bài đăng" required>
                     </div>
+                    <div class="form-group">
+                        <label>Loại gói:</label>
+                        <select id="status_post_edit" class="form-control">
+                            <option value="0">Miễn phí</option>
+                            <option value="1">Tính phí</option>
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -211,6 +226,13 @@ $(document).ready(function() {
                                 <label>Giới hạn bài đăng:</label>
                                 <input value="${res.data.usage_limit}" id="usage_limit_edit" type="text" class="form-control" placeholder="Nhập số lượng bài đăng" required>
                             </div>
+                            <div class="form-group">
+                                <label>Loại gói:</label>
+                                <select id="status_post_edit" class="form-control">
+                                    <option value="0" ${res.data.status == 0 ? 'selected' : ''}>Miễn phí</option>
+                                    <option value="1" ${res.data.status == 1 ? 'selected' : ''}>Tính phí</option>
+                                </select>
+                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -240,7 +262,8 @@ $(document).ready(function() {
                             description: $('#description_package_edit').val(),
                             price: parseFormattedNumber($('#price_package_edit').val()),
                             durationDays: parseFormattedNumber($('#duration_days_edit').val()),
-                            usageLimit: parseFormattedNumber($('#usage_limit_edit').val())
+                            usageLimit: parseFormattedNumber($('#usage_limit_edit').val()),
+                            status: $('#status_post_edit').val()
                         }),
                         headers: {
                             'Authorization': sessionStorage.getItem('token')
