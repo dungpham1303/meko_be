@@ -1,6 +1,7 @@
 import userService from './user.service.js';
 import ResponseUtils from '../../utils/response_utils.js';
 import bcrypt from 'bcrypt';
+import ResponseUtil from "../../utils/response_utils.js";
 
 const userController={
     async createUser(req,res){
@@ -151,6 +152,81 @@ const userController={
             return ResponseUtils.serverErrorResponse(res);
         }
     },
+    async thongkeController(req, res){
+      try {
+        const { startDate, endDate, type, year } = req.body;
+    
+        // Validate type
+        const allowType = ["daily", "monthly", "yearly"];
+        if (!type || !allowType.includes(type)) {
+          return ResponseUtil.validationErrorResponse(
+            res,
+            "type không hợp lệ. Hãy dùng: daily, monthly hoặc yearly"
+          );
+        }
+    
+        // Validate DAILY
+        if (type === "daily") {
+          if (!startDate || !endDate) {
+            return ResponseUtil.validationErrorResponse(
+              res,
+              "startDate và endDate là bắt buộc cho daily!"
+            );
+          }
+    
+          if (isNaN(Date.parse(startDate)) || isNaN(Date.parse(endDate))) {
+            return ResponseUtil.validationErrorResponse(
+              res,
+              "startDate hoặc endDate không hợp lệ!"
+            );
+          }
+        }
+    
+        // Validate MONTHLY
+        if (type === "monthly") {
+          if (!year) {
+            return ResponseUtil.validationErrorResponse(
+              res,
+              "year là bắt buộc cho monthly!"
+            );
+          }
+    
+          if (isNaN(year)) {
+            return ResponseUtil.validationErrorResponse(
+              res,
+              "year phải là số!"
+            );
+          }
+        }
+    
+        // YEARLY không cần validate gì thêm
+    
+        // Tính tổng doanh thu
+        // const total = await PaymentService.tongDoanhThu(startDate, endDate);
+    
+        let result;
+    
+        // DAILY
+        if (type === "daily") {
+          result = await userService.nguoiDungMoiTheoNgay(startDate, endDate);
+        }
+    
+        // MONTHLY
+        if (type === "monthly") {
+          result = await userService.nguoiDungMoiTheoThang(year);
+        }
+    
+       
+    
+        return ResponseUtil.successResponse(
+          res,result,
+          "Thống kê doanh thu"
+        );
+      } catch (error) {
+        console.log(error.message);
+        return ResponseUtil.errorResponse(res, error.message);
+      }
+    }
 }
 
 export default userController;

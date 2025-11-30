@@ -13,4 +13,5 @@ router.get('/search',UserValidation.searchUserValidation,userController.searchUs
 router.get('/profile',authenticate.authenticate,userController.getUserProfile);
 router.put('/update-pin-wallet/:id',authenticate.authenticate,UserValidation.updatePinWalletValidation,userController.updatePinWalletController);
 router.post('/create-pin-wallet',authenticate.authenticate,UserValidation.createPinWalletValidation,userController.createPinWalletController);
+router.post('/get-statistical',authenticate.authenticate,userController.thongkeController);
 export default router;

@@ -3,6 +3,7 @@ import UserRepository from './user.repository.js';
 import bcrypt from 'bcrypt';
 import PaymenRepo from '../payments/repository/payment.repository.js';
 import PaymentPackageRepo from '../payment_packages/payment.packages.repository.js';
+import database from '../../config/db.js';
 function escapeRegex(text) {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special chars
   }
@@ -70,6 +71,49 @@ class UserService{
         const hashedPinWalletNew=await bcrypt.hash(pinWalletNew,10);
         return await UserRepository.update(userId,{pin_wallet:hashedPinWalletNew});
     }
+    async nguoiDungMoiTheoNgay  (startDate, endDate){
+        const query = `
+            SELECT DATE(created_at) AS day,
+                COUNT(*) AS new_users
+            FROM users
+            WHERE DATE(created_at) BETWEEN ? AND ?
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at)
+        `;
+
+        const queryTong = `
+            SELECT COUNT(*) AS total
+            FROM users
+            WHERE DATE(created_at) BETWEEN ? AND ?
+        `;
+
+        const [dailyRaw] = await database.pool.query(query, [startDate, endDate]);
+        const [totalRaw] = await database.pool.query(queryTong, [startDate, endDate]);
+
+        return { daily: dailyRaw, total: totalRaw[0].total };
+    };
+
+    async nguoiDungMoiTheoThang(year){
+        const query = `
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS month,
+                COUNT(*) AS new_users
+            FROM users
+            WHERE YEAR(created_at) = ?
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            ORDER BY DATE_FORMAT(created_at, '%Y-%m')
+        `;
+        const [monthlyRaw] = await database.pool.query(query, [year]);
+
+        const queryTong = `
+            SELECT COUNT(*) AS total
+            FROM users
+            WHERE YEAR(created_at) = ?
+        `;
+        const [totalRaw] = await database.pool.query(queryTong, [year]);
+
+        return { monthly: monthlyRaw, total: totalRaw[0].total };
+    };
+
 
 }
 
