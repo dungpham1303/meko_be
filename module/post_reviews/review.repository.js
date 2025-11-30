@@ -66,7 +66,8 @@ class ReviewRepository extends BaseService {
         params.push(userId);
     } else if (tab === 'myComments') {
         // Sản phẩm người khác tôi đánh giá
-        whereClause = 'pr.user_id = ? AND p.user_id != ? AND pr.parent_id IS NULL';
+        // whereClause = 'pr.user_id = ? AND p.user_id != ? AND pr.parent_id IS NULL';
+        whereClause = 'pr.user_id = ? AND pr.parent_id IS NULL';
         params.push(userId, userId);
     } else {
         throw new Error('Invalid tab value');

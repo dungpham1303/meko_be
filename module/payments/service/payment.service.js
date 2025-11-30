@@ -100,6 +100,65 @@ const getPaymentsByUserId = async (userId)=>{
 }
 
 
+// thống kê theo doanh thu
+const tongDoanhThu = async(startDate,endDate)=>{
+   const query = `
+        SELECT SUM(amount) AS total_revenue
+        FROM payments
+        WHERE DATE(created_at) BETWEEN ? AND ?
+        `;
+  const [raw] = await database.pool.query(query, [startDate, endDate]);
+    return raw[0];        
+}
+
+const doanhThuTheoNgay = async (startDate, endDate) => {
+  const query = `
+    SELECT DATE(created_at) AS day,
+           SUM(amount) AS revenue
+    FROM payments
+    WHERE DATE(created_at) BETWEEN ? AND ?
+    GROUP BY DATE(created_at)
+    ORDER BY DATE(created_at)
+  `;
+
+  const queryTongDoanhThu = `
+        SELECT SUM(amount) AS total
+        FROM payments
+        WHERE DATE(created_at) BETWEEN ? AND ?
+        `;
+  const [raw] = await database.pool.query(query, [startDate, endDate]);
+  const [raw2] = await database.pool.query(queryTongDoanhThu, [startDate, endDate]);
+  return {daily:raw, total:raw2[0].total};
+};
+
+const doanhThuTheoThang = async (year) => {
+  const query = `
+    SELECT DATE_FORMAT(created_at, '%Y-%m') AS month,
+           SUM(amount) AS revenue
+    FROM payments
+    WHERE YEAR(created_at) = ?
+    GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+    ORDER BY DATE_FORMAT(created_at, '%Y-%m')
+  `;
+
+  const [raw] = await database.pool.query(query, [year]);
+  const totalRevenue = raw.reduce((sum, item) => sum + Number(item.revenue), 0);
+
+  return { monthly: raw, total: totalRevenue };
+};
+
+// const doanhThuTheoNam = async (year) => {
+//   const query = `
+//     SELECT YEAR(created_at) AS year,
+//            SUM(amount) AS revenue
+//     FROM payments
+//     WHERE YEAR(created_at) = ?
+//     GROUP BY YEAR(created_at)
+//     ORDER BY YEAR(created_at)
+//   `;
+//   const [raw] = await database.pool.query(query, [year]);
+//   return raw;
+// };
 
 
 function generateTransactionCode() {
@@ -113,5 +172,9 @@ export default {
     getPayments,
     updatePayment,
     deletePayment,
-    getPaymentsByUserId
+    getPaymentsByUserId,
+    tongDoanhThu,
+    doanhThuTheoThang,
+    doanhThuTheoNgay
+
 }
