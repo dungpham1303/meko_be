@@ -37,6 +37,7 @@ import historyRoute from './module/post_history/post.history.router.js';
 import reviewRoute from './module/post_reviews/review.route.js';
 import paymentPackageRoute from './module/payment_packages/payment.packages.route.js';
 import paymentRoute from './module/payments/payment.route.js';
+import walletLogRoute from './module/wallet_logs/wallet.logs.route.js';
 
 ///web route
 import webRoute from './routes/web.routes.js';
@@ -67,6 +68,7 @@ app.use('/api/history',historyRoute);
 app.use('/api/review',reviewRoute);
 app.use('/api/payment-package',paymentPackageRoute);
 app.use('/api/payment',paymentRoute);
+app.use('/api/walletlog',walletLogRoute);
 ///web route
 app.use('/admin', webRoute);
 

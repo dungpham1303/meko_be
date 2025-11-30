@@ -7,4 +7,5 @@ router.post("/create-payment", middleware.authenticate,validation.createPaymentV
 router.get("/vnpay_return", controller.vnp_ReturnUrl);
 router.post("/create-payment-package", middleware.authenticate, validation.createPaymentPacakgeVaidation, controller.createPaymentPacakge);
 router.get("/get-payments-by-userId",middleware.authenticate,controller.getPaymentsByUserId)
+router.post("/get-statistical",middleware.authenticate,controller.thongkeController);
 export default router;
