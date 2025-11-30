@@ -70,6 +70,10 @@ app.use('/api/payment',paymentRoute);
 ///web route
 app.use('/admin', webRoute);
 
+app.get('/chinh-sach-quyen-rieng-tu', (req, res) => {
+    res.render('privacy',);
+});
+
 app.use((req,res,next)=>{
     response_utils.notFoundResponse(res,'Đường dẫn api không tồn tại');
 });
