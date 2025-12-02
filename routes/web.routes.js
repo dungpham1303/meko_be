@@ -11,7 +11,7 @@ router.get('/login', (req, res) => {
 });
 
 router.get('/dashboard', (req, res) => {
-    res.render('master', { content:'' , title: 'Trang quản trị' });
+    res.render('report/overview-report', { title: 'Báo cáo' });
 });
 
 //user
