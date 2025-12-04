@@ -405,6 +405,10 @@ function loadRevenueReport(filterType) {
         data: JSON.stringify(requestData),
         success: function(res) {
             if (res && res.data) {
+                $('#total_revenue').html(`
+                    <p class="text-danger" style="font-size: 18px;font-weight: 700;">Tổng doanh thu: ${Math.trunc(res.data.total ?? 0).toLocaleString('en-US')} VNĐ</p>
+                `);
+
                 let labels = [];
                 let values = [];
 
@@ -449,6 +453,10 @@ function loadNewUser(filterType) {
         data: JSON.stringify(requestData),
         success: function(res) {
             if (res && res.data) {
+                $('#total_new_user').html(`
+                    <p class="text-danger" style="font-size: 18px;font-weight: 700;">Tổng lượt đăng ký mới: ${res.data.total ?? 0}</p>
+                `);
+
                 let labels = [];
                 let values = [];
 
