@@ -1,5 +1,6 @@
 <%- include('../master', { title: 'Danh sách danh mục', 
 content: `
+    <link rel="stylesheet" href="/css/main.css">
     <div class="d-flex flex-column-fluid">
         <!--begin::Container-->
         <div class="container" style="max-width: 2400px;">
@@ -55,19 +56,21 @@ content: `
                         </div>
                     </form>
                     <!--begin: Datatable-->
-                    <table class="table table-hover table-separate table-head-custom table-checkable" id="kt_datatable1">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Hình ảnh</th>
-                                <th>Tên danh mục</th>
-                                <th style="width: 100px;padding-left:0;text-align: center;">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="kt_datatable1_body">
-                            
-                        </tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table class="table table-hover table-separate table-head-custom table-checkable nowrap-table" id="kt_datatable1">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Tên danh mục</th>
+                                    <th style="width: 100px;padding-left:0;text-align: center;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kt_datatable1_body">
+                                
+                            </tbody>
+                        </table>
+                    </div>
                     <!--end: Datatable-->
                     <!-- Phân trang -->
                     <div class="row mt-4">
