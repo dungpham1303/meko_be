@@ -8,8 +8,7 @@ import response_utils from './utils/response_utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
-import initChatSockets from './sockets/chat.js';
+import initWsChat from './sockets/ws_chat.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,11 +91,7 @@ app.use((err,req,res,next)=>{
 
 
 const server = http.createServer(app);
-const io = new SocketIOServer(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
-});
-
-initChatSockets(io);
+initWsChat(server);
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
