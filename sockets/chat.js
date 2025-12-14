@@ -70,6 +70,8 @@ export default function initChatSockets(io) {
   });
 
   io.on('connection', (socket) => {
+    console.log(socket.user);
+     console.log('conneeccttt');
     const userId = Number(socket.user.id);
     socket.join(`user:${userId}`);
 
