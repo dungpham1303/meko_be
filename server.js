@@ -7,6 +7,9 @@ import testConnection from './config/db.js';
 import response_utils from './utils/response_utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import initChatSockets from './sockets/chat.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +44,7 @@ import walletLogRoute from './module/wallet_logs/wallet.logs.route.js';
 
 ///web route
 import webRoute from './routes/web.routes.js';
+import chatRoute from './module/chat/chat.route.js';
 
 // Start background cron jobs (side-effect import)
 import './module/post/cron_job.js';
@@ -69,6 +73,7 @@ app.use('/api/review',reviewRoute);
 app.use('/api/payment-package',paymentPackageRoute);
 app.use('/api/payment',paymentRoute);
 app.use('/api/walletlog',walletLogRoute);
+app.use('/api/chat', chatRoute);
 ///web route
 app.use('/admin', webRoute);
 
@@ -86,8 +91,14 @@ app.use((err,req,res,next)=>{
 });
 
 
-// Start server
-app.listen(port, () => {
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] }
+});
+
+initChatSockets(io);
+
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
