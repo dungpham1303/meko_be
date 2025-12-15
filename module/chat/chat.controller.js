@@ -14,6 +14,9 @@ export async function getConversations(req, res) {
          c.user1_id,
          c.user2_id,
          CASE WHEN c.user1_id = ? THEN c.user2_id ELSE c.user1_id END AS partner_id,
+         u.username AS partner_name,
+         u.avatar AS partner_avatar,
+         u.email   AS partner_email,
          c.last_message,
          c.last_message_type,
          c.last_message_at,
@@ -23,9 +26,13 @@ export async function getConversations(req, res) {
            WHERE m.conversation_id = c.id AND m.sender_id <> ? AND m.is_read = 0
          ) AS unread_count
        FROM conversations c
+       JOIN users u ON (
+          (c.user1_id = ? AND u.id = c.user2_id)
+          OR (c.user2_id = ? AND u.id = c.user1_id)
+       )
        WHERE c.user1_id = ? OR c.user2_id = ?
        ORDER BY (c.last_message_at IS NULL), c.last_message_at DESC, c.created_at DESC`,
-      [userId, userId, userId, userId]
+      [userId, userId, userId, userId, userId, userId]
     );
     return ResponseUtil.successResponse(res, rows);
   } catch (err) {

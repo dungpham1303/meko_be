@@ -131,11 +131,14 @@ export default function initWsChat(server) {
 
     ws.on('message', async (raw) => {
       try {
+         console.log('adsasdsdssssssssss');
         const msg = JSON.parse(raw.toString());
         const { event, data } = msg || {};
         const userId = ws.userId;
 
         if (event === 'join_conversation') {
+            console.log('adssdadsad');
+
           const otherId = Number(data?.other_user_id);
           if (!otherId) return;
           const conv = await ensureConversation(userId, otherId);
