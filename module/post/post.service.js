@@ -133,62 +133,151 @@ class PostService{
     }
 
 
-    async updatePost(post){
-        const postId=post.postId;
-        const title=post.title;
-        const description=post.description;
-        const address=post.address;
-        const price=post.price;
-        const phoneNumber=post.phoneNumber;
-        const images=post.images; // backward-compat
-        const keepOldImages = post.keepOldImages; // optional array of URLs to keep
-        const newImages = post.newImages; // optional array of newly uploaded URLs
-        const categories=post.categories;
-        const wardCode=post.wardCode;
-        const provinceCode=post.provinceCode;
+    // async updatePost(post){
+    //     const postId=post.postId;
+    //     const title=post.title;
+    //     const description=post.description;
+    //     const address=post.address;
+    //     const price=post.price;
+    //     const phoneNumber=post.phoneNumber;
+    //     const images=post.images; // backward-compat
+    //     const keepOldImages = post.keepOldImages; // optional array of URLs to keep
+    //     const newImages = post.newImages; // optional array of newly uploaded URLs
+    //     const categories=post.categories;
+    //     const wardCode=post.wardCode;
+    //     const provinceCode=post.provinceCode;
         
-        const postExists=await PostRepository.findById(postId);
-        if(!postExists){
-            throw new Error('Post not found');
-        }
-        if(provinceCode){
-            const provinceExist=await ProvinceRepository.getProvinceByCode(provinceCode);
-            if(!provinceExist){
-                throw new Error('Province not found');
-            }
-        }
-        if(wardCode){
-            const wardExist=await WardRepository.getWardByCode(wardCode);
-            if(!wardExist){
-                throw new Error('Ward not found');
-            }
-        }
-        const postUpdate={
-            title:title ?? postExists.title,
-            description:description ?? postExists.description,
-            address:address ?? postExists.address,
-            price:price ?? postExists.price,
-            ward_code:wardCode ?? postExists.ward_code,
-            province_code:provinceCode ?? postExists.province_code,
-            phone_number:phoneNumber ?? postExists.phone_number,
-            // categories:categories ?? postExists.categories
-        }
+    //     const postExists=await PostRepository.findById(postId);
+    //     if(!postExists){
+    //         throw new Error('Post not found');
+    //     }
+    //     if(provinceCode){
+    //         const provinceExist=await ProvinceRepository.getProvinceByCode(provinceCode);
+    //         if(!provinceExist){
+    //             throw new Error('Province not found');
+    //         }
+    //     }
+    //     if(wardCode){
+    //         const wardExist=await WardRepository.getWardByCode(wardCode);
+    //         if(!wardExist){
+    //             throw new Error('Ward not found');
+    //         }
+    //     }
+    //     const postUpdate={
+    //         title:title ?? postExists.title,
+    //         description:description ?? postExists.description,
+    //         address:address ?? postExists.address,
+    //         price:price ?? postExists.price,
+    //         ward_code:wardCode ?? postExists.ward_code,
+    //         province_code:provinceCode ?? postExists.province_code,
+    //         phone_number:phoneNumber ?? postExists.phone_number,
+    //         // categories:categories ?? postExists.categories
+    //     }
 
-        // Ảnh: hỗ trợ 2 kiểu dữ liệu
-        // 1) Kiểu mới: keepOldImages + newImages
-        // 2) Kiểu cũ: images (mảng đầy đủ)
+    //     // Ảnh: hỗ trợ 2 kiểu dữ liệu
+    //     // 1) Kiểu mới: keepOldImages + newImages
+    //     // 2) Kiểu cũ: images (mảng đầy đủ)
+    //     if (keepOldImages !== undefined || newImages !== undefined) {
+    //         const currentImages = await ImagePostRepository.getListImageByPostId(postId);
+    //         const currentUrls = currentImages.map(img => img.image_url);
+    //         const currentUrlSet = new Set(currentUrls);
+
+    //         let keepList;
+    //         if (keepOldImages === undefined) {
+    //             // Mặc định: nếu không gửi keepOldImages, giữ toàn bộ ảnh hiện tại (append)
+    //             keepList = currentUrls;
+    //         } else {
+    //             keepList = Array.isArray(keepOldImages) ? keepOldImages : [];
+    //             // Xác thực toàn bộ keepOldImages đều thuộc post hiện tại
+    //             for (const url of keepList) {
+    //                 if (!currentUrlSet.has(url)) {
+    //                     throw new Error('Old image not belong to post');
+    //                 }
+    //             }
+    //         }
+
+    //         const finalImageList = [
+    //             ...keepList,
+    //             ...(Array.isArray(newImages) ? newImages : [])
+    //         ];
+
+    //         // Xóa toàn bộ và tạo lại theo danh sách mới
+    //         await ImagePostRepository.deleteImagePost(postId);
+    //         if (finalImageList.length > 0) {
+    //             const imageValues = finalImageList.map((imageUrl) => ({
+    //                 post_id: postId,
+    //                 image_url: imageUrl
+    //             }));
+    //             await ImagePostRepository.createManyImagePost(imageValues);
+    //         }
+    //     } else if (images !== undefined) {
+    //         // Kiểu cũ: nếu truyền 'images' thì coi đó là danh sách cuối cùng
+    //         const imageValues = images.map((imageUrl) => ({
+    //             post_id: postId,
+    //             image_url: imageUrl
+    //         }));
+    //         await ImagePostRepository.deleteImagePost(postId);
+    //         await ImagePostRepository.createManyImagePost(imageValues);
+    //     }
+
+    //     if(categories !=null && categories.length > 0){
+    //         for(const id of categories){
+    //             const categoryExist=await Category.getCategoryRepoById(id);
+    //             if(!categoryExist){
+    //                 throw new Error('Category not found');
+    //             }
+    //         }
+
+    //         const postCategoriesValues = categories.map((categoryId) => ({
+    //             post_id: postId,
+    //             category_id: categoryId
+    //         }));
+    //         console.log(postCategoriesValues);
+    //         await PostCategoriesRepository.deletePostCategories(postId);
+    //         await PostCategoriesRepository.createManyPostCategoriesRepo(postCategoriesValues);
+    //     }
+
+    //     await PostRepository.updatePostRepo(postUpdate,postId);
+
+    //     return await this.getDetailByPostId(postId); // trả ra detail
+
+    // };
+
+    async updatePost(post) {
+        const postId = post.postId;
+        const postExists = await PostRepository.findById(postId);
+        if (!postExists) throw new Error('Post not found');
+
+        // Các trường cơ bản
+        const postUpdate = {
+            title: post.title ?? postExists.title,
+            description: post.description ?? postExists.description,
+            address: post.address ?? postExists.address,
+            price: post.price ?? postExists.price,
+            ward_code: post.wardCode ?? postExists.ward_code,
+            province_code: post.provinceCode ?? postExists.province_code,
+            phone_number: post.phoneNumber ?? postExists.phone_number,
+        };
+
+        // Ảnh
+        const keepOldImages = post.keepOldImages; // optional array
+        const newImages = post.newImages;         // optional array
+        const images = post.images;               // kiểu cũ, optional
+
+        const currentImages = await ImagePostRepository.getListImageByPostId(postId);
+        const currentUrls = currentImages.map(img => img.image_url);
+        const currentUrlSet = new Set(currentUrls);
+
+        let finalImageList = [];
+
         if (keepOldImages !== undefined || newImages !== undefined) {
-            const currentImages = await ImagePostRepository.getListImageByPostId(postId);
-            const currentUrls = currentImages.map(img => img.image_url);
-            const currentUrlSet = new Set(currentUrls);
-
-            let keepList;
+            // Kiểu mới: keepOldImages + newImages
+            let keepList = [];
             if (keepOldImages === undefined) {
-                // Mặc định: nếu không gửi keepOldImages, giữ toàn bộ ảnh hiện tại (append)
+                // Mặc định giữ tất cả ảnh hiện tại
                 keepList = currentUrls;
             } else {
                 keepList = Array.isArray(keepOldImages) ? keepOldImages : [];
-                // Xác thực toàn bộ keepOldImages đều thuộc post hiện tại
                 for (const url of keepList) {
                     if (!currentUrlSet.has(url)) {
                         throw new Error('Old image not belong to post');
@@ -196,52 +285,47 @@ class PostService{
                 }
             }
 
-            const finalImageList = [
-                ...keepList,
-                ...(Array.isArray(newImages) ? newImages : [])
-            ];
+            finalImageList = [...keepList, ...(Array.isArray(newImages) ? newImages : [])];
 
-            // Xóa toàn bộ và tạo lại theo danh sách mới
             await ImagePostRepository.deleteImagePost(postId);
             if (finalImageList.length > 0) {
-                const imageValues = finalImageList.map((imageUrl) => ({
-                    post_id: postId,
-                    image_url: imageUrl
-                }));
+                const imageValues = finalImageList.map(url => ({ post_id: postId, image_url: url }));
                 await ImagePostRepository.createManyImagePost(imageValues);
             }
-        } else if (images !== undefined) {
-            // Kiểu cũ: nếu truyền 'images' thì coi đó là danh sách cuối cùng
-            const imageValues = images.map((imageUrl) => ({
-                post_id: postId,
-                image_url: imageUrl
-            }));
-            await ImagePostRepository.deleteImagePost(postId);
-            await ImagePostRepository.createManyImagePost(imageValues);
-        }
 
-        if(categories !=null && categories.length > 0){
-            for(const id of categories){
-                const categoryExist=await Category.getCategoryRepoById(id);
-                if(!categoryExist){
-                    throw new Error('Category not found');
-                }
+        } else if (images !== undefined) {
+            // Kiểu cũ: thay toàn bộ ảnh
+            finalImageList = Array.isArray(images) ? images : [];
+            await ImagePostRepository.deleteImagePost(postId);
+            if (finalImageList.length > 0) {
+                const imageValues = finalImageList.map(url => ({ post_id: postId, image_url: url }));
+                await ImagePostRepository.createManyImagePost(imageValues);
             }
 
-            const postCategoriesValues = categories.map((categoryId) => ({
+        } else {
+            // Không gửi gì về ảnh → giữ nguyên DB
+        }
+
+        // Categories
+        if (post.categories != null && Array.isArray(post.categories) && post.categories.length > 0) {
+            for (const id of post.categories) {
+                const categoryExist = await Category.getCategoryRepoById(id);
+                if (!categoryExist) throw new Error('Category not found');
+            }
+            const postCategoriesValues = post.categories.map((categoryId) => ({
                 post_id: postId,
                 category_id: categoryId
             }));
-            console.log(postCategoriesValues);
             await PostCategoriesRepository.deletePostCategories(postId);
             await PostCategoriesRepository.createManyPostCategoriesRepo(postCategoriesValues);
         }
 
-        await PostRepository.updatePostRepo(postUpdate,postId);
+        // Cập nhật post
+        await PostRepository.updatePostRepo(postUpdate, postId);
 
-        return await this.getDetailByPostId(postId); // trả ra detail
+    return await this.getDetailByPostId(postId);
+}
 
-    };
 
 
     async searchPost(post,page,limit){
