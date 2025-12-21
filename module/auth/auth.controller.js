@@ -19,7 +19,7 @@ const authController={
         try {
             const {email,password}=req.body;
             const user=await authService.login({email,password});
-            const token=jwt.sign({email:user.email,role:user.role,userId:user.id},process.env.JWT_SECRET,{expiresIn:'2h'});
+            const token=jwt.sign({email:user.email,role:user.role,userId:user.id},process.env.JWT_SECRET,{expiresIn:'7d'});
 
             user.refresh_token=jwt.sign({email:user.email,role:user.role,userId:user.id},process.env.JWT_SECRET,{expiresIn:'7d'});
             user.token_expired = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);

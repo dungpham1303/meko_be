@@ -15,6 +15,27 @@ import PaymenUsageRepository from '../payments/repository/paymen.usage.repositor
 
 
 class PostService{
+
+    async ratingService(postId,userId,rating){
+         const user=await UserRepository.findByIdUserRepo(userId);
+        if(!user){
+            throw new Error('User not found');
+        }
+       const post=await PostRepository.findById(postId);
+       if(!post){
+           throw new Error('Post not found');
+       }
+       if(Number(rating)<1 || Number(rating)>5){
+           throw new Error('Rating must be between 1 and 5');
+       }
+       
+       const ratingExists=await PostRepository.findOne({post_id:postId,user_id:userId});
+       if(ratingExists){
+           throw new Error('You have already rated this post');
+       }
+
+    }
+
     async createPost(post){
         const userId=post.userId;
         const provinceCode=post.provinceCode;

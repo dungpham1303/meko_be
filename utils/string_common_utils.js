@@ -18,6 +18,7 @@ const stringCommonUtils={
                     p.phone_number as phoneNumber,
                     p.expired_at as expiredAt,
                     p.is_pinned as isPinned,
+                    p.rating as rating,
                     p.created_at as createdAt,
                     p.updated_at as updatedAt,
                     p.ward_code as wardCode,
@@ -42,7 +43,7 @@ const stringCommonUtils={
                 ${whereClause}
                 GROUP BY 
                     p.id, p.user_id, p.title, p.description, p.price, p.address, 
-                    p.status, p.expired_at, p.is_pinned, p.created_at, p.updated_at`
+                    p.status, p.expired_at, p.is_pinned, p.rating, p.created_at, p.updated_at`
     }
 }
 export default stringCommonUtils;

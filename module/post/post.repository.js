@@ -59,7 +59,6 @@ class PostRepository extends BaseService {
     async updateStatusPostRepo(postId,post){
         return await this.updateWhere({id:postId},post);
     }
-
     async getExpiredPosts() {
         const sql = `
             SELECT * FROM post
