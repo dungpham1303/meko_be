@@ -18,6 +18,13 @@ class OrderService {
       ghn_order_code = null,
       shipping_status = "PENDING",
       order_status = "CREATED",
+      // Accept shipping administrative codes (aliases supported)
+      to_province_id: _toProvinceId,
+      to_district_id: _toDistrictId,
+      to_ward_code: _toWardCode,
+      province_id: _provinceId,
+      district_id: _districtId,
+      ward_code: _wardCode,
     } = payload || {};
 
     if (!customer_name || !customer_phone || !customer_address) {
@@ -31,6 +38,11 @@ class OrderService {
       const exist = await OrderRepo.findByOrderCode(code);
       if (exist) throw new Error("Mã đơn đã tồn tại");
     }
+
+    // Resolve administrative codes with alias fallback
+    const to_province_id = _toProvinceId ?? _provinceId ?? null;
+    const to_district_id = _toDistrictId ?? _districtId ?? null;
+    const to_ward_code = _toWardCode ?? _wardCode ?? null;
 
     const data = {
       order_code: code,
@@ -47,6 +59,9 @@ class OrderService {
       ghn_order_code,
       shipping_status,
       order_status,
+      to_province_id,
+      to_district_id,
+      to_ward_code,
     };
 
     const created = await OrderRepo.create(data);
