@@ -41,6 +41,7 @@ import ratingRoute from './module/post_rating/rating.route.js';
 import paymentPackageRoute from './module/payment_packages/payment.packages.route.js';
 import paymentRoute from './module/payments/payment.route.js';
 import walletLogRoute from './module/wallet_logs/wallet.logs.route.js';
+import orderRoute from './module/orders/order.route.js';
 
 ///web route
 import webRoute from './routes/web.routes.js';
@@ -75,6 +76,7 @@ app.use('/api/payment-package',paymentPackageRoute);
 app.use('/api/payment',paymentRoute);
 app.use('/api/walletlog',walletLogRoute);
 app.use('/api/chat', chatRoute);
+app.use('/api/order', orderRoute);
 ///web route
 app.use('/admin', webRoute);
 

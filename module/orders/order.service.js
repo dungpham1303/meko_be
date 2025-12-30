@@ -1,0 +1,137 @@
+import OrderRepo from "./order.repository.js";
+import GHNService from "./ghn.service.js";
+
+class OrderService {
+  async createOrder(payload) {
+    const {
+      order_code,
+      customer_id = null,
+      customer_name,
+      customer_phone,
+      customer_address,
+      subtotal_amount = 0,
+      shipping_fee = 0,
+      total_amount = 0,
+      payment_method = "COD",
+      payment_status = "UNPAID",
+      shipping_provider = "GHN",
+      ghn_order_code = null,
+      shipping_status = "PENDING",
+      order_status = "CREATED",
+    } = payload || {};
+
+    if (!customer_name || !customer_phone || !customer_address) {
+      throw new Error("Thiếu thông tin khách hàng");
+    }
+
+    let code = order_code;
+    if (!code) {
+      code = await OrderRepo.generateOrderCode();
+    } else {
+      const exist = await OrderRepo.findByOrderCode(code);
+      if (exist) throw new Error("Mã đơn đã tồn tại");
+    }
+
+    const data = {
+      order_code: code,
+      customer_id,
+      customer_name,
+      customer_phone,
+      customer_address,
+      subtotal_amount,
+      shipping_fee,
+      total_amount,
+      payment_method,
+      payment_status,
+      shipping_provider,
+      ghn_order_code,
+      shipping_status,
+      order_status,
+    };
+
+    const created = await OrderRepo.create(data);
+    const detail = await OrderRepo.findById(created.insertId);
+    return detail;
+  }
+
+  async getById(id) {
+    const order = await OrderRepo.findById(id);
+    if (!order) throw new Error("Không tìm thấy đơn hàng");
+    return order;
+  }
+
+  async getByCode(orderCode) {
+    const order = await OrderRepo.findByOrderCode(orderCode);
+    if (!order) throw new Error("Không tìm thấy đơn hàng");
+    return order;
+  }
+
+  async list({ page = 0, limit = 10, filters = {}, orderBy = "id", sort = "DESC" }) {
+    const conditions = {};
+    const allowExact = [
+      "customer_id",
+      "payment_method",
+      "payment_status",
+      "shipping_provider",
+      "shipping_status",
+      "order_status",
+      "id",
+      "order_code",
+    ];
+    for (const k of allowExact) {
+      if (filters[k] !== undefined && filters[k] !== "") conditions[k] = filters[k];
+    }
+
+    if (filters.q) {
+      conditions.$or = [
+        { order_code: filters.q },
+        { customer_name: filters.q },
+        { customer_phone: filters.q },
+      ];
+    }
+
+    return await OrderRepo.paginate(page, limit, conditions, orderBy, sort);
+  }
+
+  async updatePaymentStatus(id, status) {
+    const order = await this.getById(id);
+    await OrderRepo.update(id, { payment_status: status });
+    return { ...order, payment_status: status };
+  }
+
+  async updateShippingStatus(id, status, ghnOrderCode = null) {
+    const order = await this.getById(id);
+    const data = { shipping_status: status };
+    if (ghnOrderCode !== null) data.ghn_order_code = ghnOrderCode;
+    await OrderRepo.update(id, data);
+    return { ...order, ...data };
+  }
+
+  async updateOrderStatus(id, status) {
+    const order = await this.getById(id);
+    await OrderRepo.update(id, { order_status: status });
+    return { ...order, order_status: status };
+  }
+
+  async createGhnOrder(id, shipment) {
+    const order = await this.getById(id);
+    const resp = await GHNService.createOrder({ order, shipment });
+    const code = resp?.data?.order_code || resp?.order_code || resp?.code;
+    if (!code) throw new Error("Tạo đơn GHN thất bại");
+    await OrderRepo.update(id, { ghn_order_code: code, shipping_status: "CREATED", shipping_provider: "GHN" });
+    return await this.getById(id);
+  }
+
+  async refreshGhnStatus(id) {
+    const order = await this.getById(id);
+    if (!order.ghn_order_code) throw new Error("Đơn hàng chưa có mã GHN");
+    const info = await GHNService.getOrderInfo(order.ghn_order_code);
+    const mapped = GHNService.mapStatus(info?.data?.status || info?.status);
+    if (mapped) {
+      await OrderRepo.update(id, { shipping_status: mapped });
+    }
+    return await this.getById(id);
+  }
+}
+
+export default new OrderService();
