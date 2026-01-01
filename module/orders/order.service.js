@@ -1,10 +1,12 @@
 import OrderRepo from "./order.repository.js";
 import GHNService from "./ghn.service.js";
+import UserRepo from "../users/user.repository.js";
 
 class OrderService {
   async createOrder(payload) {
     const {
       order_code,
+      seller_id = null,
       customer_id = null,
       customer_name,
       customer_phone,
@@ -31,6 +33,16 @@ class OrderService {
       throw new Error("Thiếu thông tin khách hàng");
     }
 
+    // Validate seller and customer exist if provided
+    if (seller_id !== null && seller_id !== undefined) {
+      const seller = (await UserRepo.findByIdUserRepo(seller_id)) || (await UserRepo.findById(seller_id));
+      if (!seller) throw new Error("Người bán (seller_id) không tồn tại");
+    }
+    if (customer_id !== null && customer_id !== undefined) {
+      const customer = (await UserRepo.findByIdUserRepo(customer_id)) || (await UserRepo.findById(customer_id));
+      if (!customer) throw new Error("Người mua (customer_id) không tồn tại");
+    }
+
     let code = order_code;
     if (!code) {
       code = await OrderRepo.generateOrderCode();
@@ -46,6 +58,7 @@ class OrderService {
 
     const data = {
       order_code: code,
+      seller_id,
       customer_id,
       customer_name,
       customer_phone,
@@ -84,6 +97,7 @@ class OrderService {
   async list({ page = 0, limit = 10, filters = {}, orderBy = "id", sort = "DESC" }) {
     const conditions = {};
     const allowExact = [
+      "seller_id",
       "customer_id",
       "payment_method",
       "payment_status",
@@ -133,7 +147,34 @@ class OrderService {
     const resp = await GHNService.createOrder({ order, shipment });
     const code = resp?.data?.order_code || resp?.order_code || resp?.code;
     if (!code) throw new Error("Tạo đơn GHN thất bại");
-    await OrderRepo.update(id, { ghn_order_code: code, shipping_status: "CREATED", shipping_provider: "GHN" });
+    // Persist shipment attributes on orders only when creating a waybill
+    const w = Number(shipment?.weight ?? 0) || null;
+    const l = Number(shipment?.length ?? 0) || null;
+    const wi = Number(shipment?.width ?? 0) || null;
+    const h = Number(shipment?.height ?? 0) || null;
+    const rn = shipment?.required_note ?? null;
+    // From-address fields (prefer shipment overrides; if absent, leave null to indicate from ENV/shop config)
+    const from_name = shipment?.from_name ?? null;
+    const from_phone = shipment?.from_phone ?? null;
+    const from_address = shipment?.from_address ?? null;
+    const from_district_id = shipment?.from_district_id ?? null;
+    const from_ward_code = shipment?.from_ward_code ?? null;
+
+    await OrderRepo.update(id, {
+      ghn_order_code: code,
+      shipping_status: "CREATED",
+      shipping_provider: "GHN",
+      weight: w,
+      length: l,
+      width: wi,
+      height: h,
+      required_note: rn,
+      from_name,
+      from_phone,
+      from_address,
+      from_district_id,
+      from_ward_code,
+    });
     return await this.getById(id);
   }
 
