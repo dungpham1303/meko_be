@@ -12,6 +12,79 @@ class OrderController {
       return response.errorResponse(res, e.message || "Tạo đơn hàng thất bại", 400);
     }
   }
+  // GHN master-data proxy helpers
+  async ghnProvinces(req, res) {
+    try {
+      const data = await GHNService.listProvinces();
+      return response.successResponse(res, data);
+    } catch (e) {
+      return response.errorResponse(res, e.message || 'Không lấy được danh sách tỉnh');
+    }
+  }
+
+  async ghnProvinceDetail(req, res) {
+    try {
+      const id = Number(req.params.id);
+      const list = await GHNService.listProvinces();
+      const item = (list || []).find(p => Number(p.ProvinceID) === id);
+      if (!item) return response.notFoundResponse(res, 'Không tìm thấy tỉnh');
+      return response.successResponse(res, item);
+    } catch (e) {
+      return response.errorResponse(res, e.message || 'Không lấy được chi tiết tỉnh');
+    }
+  }
+
+  async ghnDistricts(req, res) {
+    try {
+      const pid = Number(req.query.province_id);
+      if (!pid) return response.validationErrorResponse(res, 'Thiếu province_id');
+      const data = await GHNService.listDistricts(pid);
+      return response.successResponse(res, data);
+    } catch (e) {
+      return response.errorResponse(res, e.message || 'Không lấy được danh sách quận/huyện');
+    }
+  }
+
+  async ghnDistrictDetail(req, res) {
+    try {
+      const pid = Number(req.query.province_id);
+      const id = Number(req.params.id);
+      if (!pid) return response.validationErrorResponse(res, 'Thiếu province_id');
+      const list = await GHNService.listDistricts(pid);
+      const item = (list || []).find(d => Number(d.DistrictID) === id);
+      if (!item) return response.notFoundResponse(res, 'Không tìm thấy quận/huyện');
+      return response.successResponse(res, item);
+    } catch (e) {
+      return response.errorResponse(res, e.message || 'Không lấy được chi tiết quận/huyện');
+    }
+  }
+
+  async ghnWards(req, res) {
+    try {
+      const did = Number(req.query.district_id);
+      if (!did) return response.validationErrorResponse(res, 'Thiếu district_id');
+      const data = await GHNService.listWards(did);
+      return response.successResponse(res, data);
+    } catch (e) {
+      return response.errorResponse(res, e.message || 'Không lấy được danh sách phường/xã');
+    }
+  }
+
+  async ghnWardDetail(req, res) {
+    try {
+      const did = Number(req.query.district_id);
+      const code = String(req.params.code || '').trim();
+      if (!did) return response.validationErrorResponse(res, 'Thiếu district_id');
+      if (!code) return response.validationErrorResponse(res, 'Thiếu ward_code');
+      const list = await GHNService.listWards(did);
+      const item = (list || []).find(w => String(w.WardCode) === code);
+      if (!item) return response.notFoundResponse(res, 'Không tìm thấy phường/xã');
+      return response.successResponse(res, item);
+    } catch (e) {
+      return response.errorResponse(res, e.message || 'Không lấy được chi tiết phường/xã');
+    }
+  }
+
 
   async detail(req, res) {
     try {
@@ -105,6 +178,17 @@ class OrderController {
       return response.successResponse(res, data, "Cập nhật trạng thái đơn hàng thành công");
     } catch (e) {
       return response.errorResponse(res, e.message || "Cập nhật thất bại", 400);
+    }
+  }
+
+  async updateDraft(req, res) {
+    try {
+      const id = Number(req.params.id);
+      const payload = req.body || {};
+      const data = await OrderService.updateOrderDraft(id, payload);
+      return response.successResponse(res, data, "Cập nhật đơn nháp thành công");
+    } catch (e) {
+      return response.errorResponse(res, e.message || "Cập nhật đơn nháp thất bại", 400);
     }
   }
 

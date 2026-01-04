@@ -142,6 +142,52 @@ class OrderService {
     return { ...order, order_status: status };
   }
 
+  async updateOrderDraft(id, payload = {}) {
+    const order = await this.getById(id);
+    // Chỉ cho phép cập nhật khi đơn chưa xác nhận
+    if (order.order_status !== 'CREATED') {
+      throw new Error('Chỉ được phép cập nhật khi đơn hàng chưa được xác nhận (order_status=CREATED)');
+    }
+    // Không cho cập nhật nếu đã có vận đơn GHN
+    if (order.ghn_order_code) {
+      throw new Error('Đơn đã có vận đơn, không thể chỉnh sửa');
+    }
+
+    // Whitelist các trường cho phép chỉnh sửa trước khi xác nhận
+    const {
+      seller_id,
+      customer_id,
+      customer_name,
+      customer_phone,
+      customer_address,
+      subtotal_amount,
+      shipping_fee,
+      total_amount,
+      payment_method,
+      to_province_id,
+      to_district_id,
+      to_ward_code,
+    } = payload || {};
+
+    const data = {};
+    if (seller_id !== undefined) data.seller_id = seller_id;
+    if (customer_id !== undefined) data.customer_id = customer_id;
+    if (customer_name !== undefined) data.customer_name = customer_name;
+    if (customer_phone !== undefined) data.customer_phone = customer_phone;
+    if (customer_address !== undefined) data.customer_address = customer_address;
+    if (subtotal_amount !== undefined) data.subtotal_amount = subtotal_amount;
+    if (shipping_fee !== undefined) data.shipping_fee = shipping_fee;
+    if (total_amount !== undefined) data.total_amount = total_amount;
+    if (payment_method !== undefined) data.payment_method = payment_method;
+    if (to_province_id !== undefined) data.to_province_id = to_province_id;
+    if (to_district_id !== undefined) data.to_district_id = to_district_id;
+    if (to_ward_code !== undefined) data.to_ward_code = to_ward_code;
+
+    if (Object.keys(data).length === 0) return order;
+    await OrderRepo.update(id, data);
+    return await this.getById(id);
+  }
+
   async createGhnOrder(id, shipment) {
     const order = await this.getById(id);
     const resp = await GHNService.createOrder({ order, shipment });
@@ -157,6 +203,7 @@ class OrderService {
     const from_name = shipment?.from_name ?? null;
     const from_phone = shipment?.from_phone ?? null;
     const from_address = shipment?.from_address ?? null;
+    const from_province_id = shipment?.from_province_id ?? null;
     const from_district_id = shipment?.from_district_id ?? null;
     const from_ward_code = shipment?.from_ward_code ?? null;
 
@@ -172,6 +219,7 @@ class OrderService {
       from_name,
       from_phone,
       from_address,
+      from_province_id,
       from_district_id,
       from_ward_code,
     });

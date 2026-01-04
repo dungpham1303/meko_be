@@ -159,6 +159,43 @@ class GHNService {
     if (s.includes('cancel')) return 'CANCEL';
     return null;
   }
+
+  // Master data helpers
+  async listProvinces() {
+    const res = await fetch(makeUrl('/master-data/province'), {
+      method: 'GET',
+      headers: buildHeaders(),
+    });
+    if (!res.ok) throw new Error(`GHN province error ${res.status}`);
+    const data = await res.json();
+    return data?.data || data;
+  }
+
+  async listDistricts(province_id) {
+    const pid = Number(province_id);
+    if (!pid) throw new Error('province_id is required');
+    const res = await fetch(makeUrl('/master-data/district'), {
+      method: 'POST',
+      headers: buildHeaders(),
+      body: JSON.stringify({ province_id: pid })
+    });
+    if (!res.ok) throw new Error(`GHN district error ${res.status}`);
+    const data = await res.json();
+    return data?.data || data;
+  }
+
+  async listWards(district_id) {
+    const did = Number(district_id);
+    if (!did) throw new Error('district_id is required');
+    const res = await fetch(makeUrl('/master-data/ward'), {
+      method: 'POST',
+      headers: buildHeaders(),
+      body: JSON.stringify({ district_id: did })
+    });
+    if (!res.ok) throw new Error(`GHN ward error ${res.status}`);
+    const data = await res.json();
+    return data?.data || data;
+  }
 }
 
 export default new GHNService();
