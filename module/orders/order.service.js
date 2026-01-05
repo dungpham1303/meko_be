@@ -3,6 +3,45 @@ import GHNService from "./ghn.service.js";
 import UserRepo from "../users/user.repository.js";
 
 class OrderService {
+  async _enrichAddressNames(order) {
+    if (!order) return order;
+    const provinces = await GHNService.listProvinces();
+    const pMap = new Map();
+    for (const p of provinces || []) pMap.set(Number(p.ProvinceID), p.ProvinceName || p.ProvinceNameEN || p.NameExtension?.[0] || "");
+
+    const provinceIds = new Set();
+    const districtIds = new Set();
+    if (order.to_province_id) provinceIds.add(Number(order.to_province_id));
+    if (order.from_province_id) provinceIds.add(Number(order.from_province_id));
+    if (order.to_district_id) districtIds.add(Number(order.to_district_id));
+    if (order.from_district_id) districtIds.add(Number(order.from_district_id));
+
+    const dMap = new Map();
+    for (const pid of provinceIds) {
+      try {
+        const ds = await GHNService.listDistricts(pid);
+        for (const d of ds || []) dMap.set(Number(d.DistrictID), d.DistrictName || d.DistrictNameEN || "");
+      } catch {}
+    }
+
+    const wMap = new Map();
+    for (const did of districtIds) {
+      try {
+        const ws = await GHNService.listWards(did);
+        for (const w of ws || []) wMap.set(String(w.WardCode), w.WardName || w.WardNameEN || "");
+      } catch {}
+    }
+
+    return {
+      ...order,
+      to_province_name: order.to_province_id ? (pMap.get(Number(order.to_province_id)) || null) : null,
+      to_district_name: order.to_district_id ? (dMap.get(Number(order.to_district_id)) || null) : null,
+      to_ward_name: order.to_ward_code ? (wMap.get(String(order.to_ward_code)) || null) : null,
+      from_province_name: order.from_province_id ? (pMap.get(Number(order.from_province_id)) || null) : null,
+      from_district_name: order.from_district_id ? (dMap.get(Number(order.from_district_id)) || null) : null,
+      from_ward_name: order.from_ward_code ? (wMap.get(String(order.from_ward_code)) || null) : null,
+    };
+  }
   async createOrder(payload) {
     const {
       order_code,
@@ -85,13 +124,13 @@ class OrderService {
   async getById(id) {
     const order = await OrderRepo.findById(id);
     if (!order) throw new Error("Không tìm thấy đơn hàng");
-    return order;
+    return await this._enrichAddressNames(order);
   }
 
   async getByCode(orderCode) {
     const order = await OrderRepo.findByOrderCode(orderCode);
     if (!order) throw new Error("Không tìm thấy đơn hàng");
-    return order;
+    return await this._enrichAddressNames(order);
   }
 
   async list({ page = 0, limit = 10, filters = {}, orderBy = "id", sort = "DESC" }) {
@@ -119,7 +158,55 @@ class OrderService {
       ];
     }
 
-    return await OrderRepo.paginate(page, limit, conditions, orderBy, sort);
+    const result = await OrderRepo.paginate(page, limit, conditions, orderBy, sort);
+    const items = Array.isArray(result?.content) ? result.content : [];
+    if (!items.length) return result;
+
+    const provinces = await GHNService.listProvinces();
+    const pMap = new Map();
+    for (const p of provinces || []) pMap.set(Number(p.ProvinceID), p.ProvinceName || p.ProvinceNameEN || p.NameExtension?.[0] || "");
+
+    const provinceIds = new Set();
+    const districtIds = new Set();
+    const byProvince = new Map();
+    for (const it of items) {
+      if (it.to_province_id) provinceIds.add(Number(it.to_province_id));
+      if (it.to_district_id) districtIds.add(Number(it.to_district_id));
+      if (it.from_province_id) provinceIds.add(Number(it.from_province_id));
+      if (it.from_district_id) districtIds.add(Number(it.from_district_id));
+    }
+
+    const dMap = new Map();
+    for (const pid of provinceIds) {
+      try {
+        const ds = await GHNService.listDistricts(pid);
+        byProvince.set(pid, ds || []);
+        for (const d of ds || []) {
+          dMap.set(Number(d.DistrictID), d.DistrictName || d.DistrictNameEN || "");
+        }
+      } catch {}
+    }
+
+    const wMap = new Map();
+    for (const did of districtIds) {
+      try {
+        const ws = await GHNService.listWards(did);
+        for (const w of ws || []) {
+          wMap.set(String(w.WardCode), w.WardName || w.WardNameEN || "");
+        }
+      } catch {}
+    }
+
+    result.content = items.map(it => ({
+      ...it,
+      to_province_name: it.to_province_id ? (pMap.get(Number(it.to_province_id)) || null) : null,
+      to_district_name: it.to_district_id ? (dMap.get(Number(it.to_district_id)) || null) : null,
+      to_ward_name: it.to_ward_code ? (wMap.get(String(it.to_ward_code)) || null) : null,
+      from_province_name: it.from_province_id ? (pMap.get(Number(it.from_province_id)) || null) : null,
+      from_district_name: it.from_district_id ? (dMap.get(Number(it.from_district_id)) || null) : null,
+      from_ward_name: it.from_ward_code ? (wMap.get(String(it.from_ward_code)) || null) : null,
+    }));
+    return result;
   }
 
   async updatePaymentStatus(id, status) {
