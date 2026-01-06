@@ -14,6 +14,10 @@ router.get('/dashboard', (req, res) => {
     res.render('report/overview-report', { title: 'Báo cáo' });
 });
 
+router.get('/list/order', (req, res) => {
+    res.render('order/list-order', { title: 'Quản lý đơn hàng' });
+});
+
 //userkkk
 router.get('/list/user', (req, res) => {
     res.render('user/list-user', { title: 'Quản lý người dùng' });

@@ -1,0 +1,209 @@
+<%- include('../master', { title: 'Danh sách đơn hàng', 
+content: `
+    <link rel="stylesheet" href="/css/main.css">
+    <div class="d-flex flex-column-fluid">
+        <!--begin::Container-->
+        <div class="container" style="max-width: 2400px;">
+            <!--begin::Card-->
+            <div class="card card-custom gutter-b">
+                <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                    <div class="card-title">
+                        <h3 class="card-label">Danh sách đơn hàng</h3>
+                    </div>
+                    <div class="card-toolbar">
+                        <!--begin::Dropdown-->
+                        <div class="dropdown dropdown-inline mr-2">
+                            <button type="button" class="btn-add-category btn btn-primary font-weight-bolder">
+                                <span class="svg-icon svg-icon-md"></span>Thêm mới
+                            </button>
+                        </div>
+                        <!--end::Dropdown-->
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form class="mb-10">
+                        <div class="row">
+                            <div class="form-group col-12 col-sm-6 col-lg-3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="la la-search"></i>
+                                        </span>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        id="input_search" 
+                                        name="input_search" 
+                                        class="form-control search-input" 
+                                        placeholder="Tìm kiếm..."
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-lg-9 col-sm-6 col-12">
+                                <button class="btn btn-primary btn-primary--icon" id="kt_search_4">
+                                    <span>
+                                        <i class="la la-search"></i>
+                                        <span>Tìm kiếm</span>
+                                    </span>
+                                </button>&#160;&#160;
+                                <button class="btn btn-secondary btn-secondary--icon" id="kt_reset_4">
+                                    <span>
+                                        <i class="la la-close"></i>
+                                        <span>Reset</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <!--begin: Datatable-->
+                    <div class="table-wrapper">
+                        <table class="table table-hover table-separate table-head-custom table-checkable nowrap-table" id="kt_datatable1">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Tên KH</th>
+                                    <th>SĐT</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Tạm tính</th>
+                                    <th>Phí ship</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Đơn vị giao hàng</th>
+                                    <th>Trạng thái</th>
+                                    <th style="width: 100px;padding-left:0;text-align: center;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kt_datatable1_body">
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--end: Datatable-->
+                    <!-- Phân trang -->
+                    <div class="row mt-4">
+                        <div class="col-12 col-md-4 mb-2 mb-md-0">
+                            <div class="d-flex align-items-center">
+                                <span class="mr-2">Hiển thị:</span>
+                                <select id="page-size-selector" class="form-control form-control-sm"
+                                    style="width: auto;">
+                                    <option value="10">10</option>
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="ml-2">bản ghi</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 mb-2 mb-md-0 text-center">
+                            <div class="pagination-info">
+                                <span id="pagination-text">Hiển thị 1-20 của 0 bản ghi</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 text-right">
+                            <div class="pagination-controls">
+                                <button id="prev-page" class="btn btn-sm btn-outline-secondary" disabled>
+                                    <i class="la la-angle-left"></i> Trước
+                                </button>
+                                <span class="mx-2">
+                                    <span id="current-page">1</span> / <span id="total-pages">1</span>
+                                </span>
+                                <button id="next-page" class="btn btn-sm btn-outline-secondary" disabled>
+                                    Sau <i class="la la-angle-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end::Card-->
+        </div>
+        <!--end::Container-->
+    </div>
+
+    <!-- Modal-->
+    <div class="modal fade" id="exampleModalCenter" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdrop" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" id="modalContent">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thông tin vận chuyển</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body pt-1">
+                    <form id="orderForm">
+                        <input type="hidden" id="order_code_hidden">
+                        <!-- KHỐI NGƯỜI BÁN -->
+                        <div class="font-weight-bold pt-3 pr-3 pb-3">
+                            THÔNG TIN NGƯỜI BÁN
+                        </div>
+                        <div class="card mb-4 border border-primary">
+                            <div class="card-body row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Tên shop</label>
+                                    <input id="shop_name" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Số điện thoại</label>
+                                    <input id="shop_phone" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-12 mb-2">
+                                    <label>Địa chỉ</label>
+                                    <input id="shop_address" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KHỐI NGƯỜI NHẬN -->
+                        <div class="font-weight-bold pt-3 pr-3 pb-3">
+                            THÔNG TIN NGƯỜI NHẬN
+                        </div>
+                        <div class="card mb-4 border border-success">
+                            <div class="card-body row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Họ tên</label>
+                                    <input id="customer_name" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Số điện thoại</label>
+                                    <input id="customer_phone" class="form-control" readonly>
+                                </div>
+                                <div class="col-md-12 mb-2">
+                                    <label>Địa chỉ giao hàng</label>
+                                    <input id="customer_address" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- GHI CHÚ -->
+                        <div class="font-weight-bold pt-3 pr-3 pb-3">
+                            GHI CHÚ ĐƠN HÀNG
+                        </div>
+                        <div class="card border border-warning mb-4">
+                            <div class="card-body">
+                                <input id="required_note" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <!-- Trạng thái -->
+                        <div class="font-weight-bold pt-3 pr-3 pb-3">
+                            TRẠNG THÁI ĐƠN HÀNG
+                        </div>
+                        <select id="status_order_edit" class="form-control">
+                            <option value="CREATED">Đã tạo đơn</option>
+                            <option value="PICKING">Đang lấy hàng</option>
+                            <option value="PICKED">Đã lấy hàng</option>
+                            <option value="DELIVERING">Đang giao hàng</option>
+                            <option value="DELIVERED">Đã giao thành công</option>
+                            <option value="RETURN">Hoàn hàng</option>
+                            <option value="CANCEL">Đã huỷ</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary" data-dismiss="modal">Huỷ</button>
+                    <button id="btn_save_edit" type="button" class="btn btn-primary btn-save-add">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/js/order/order.js"></script>
+` }) %>
