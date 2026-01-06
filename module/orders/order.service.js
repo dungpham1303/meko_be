@@ -298,6 +298,7 @@ class OrderService {
       ghn_order_code: code,
       shipping_status: "CREATED",
       shipping_provider: "GHN",
+      order_status: "CONFIRMED",
       weight: w,
       length: l,
       width: wi,
