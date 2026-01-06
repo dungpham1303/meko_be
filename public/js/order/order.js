@@ -138,7 +138,15 @@ $(document).ready(function () {
 
 $(document).on('click', '.btn-edit-order', function() {
     const orderId = $(this).data('id');
-
+    Swal.fire({
+        title: 'Đang xử lý...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        onOpen: () => {
+            swal.showLoading();
+        }
+    });
     $.ajax({
         url: `/api/order/detail/${orderId}`,
         method: 'GET',
@@ -146,6 +154,7 @@ $(document).on('click', '.btn-edit-order', function() {
             'Authorization': sessionStorage.getItem('token')
         },
         success: function (res) {
+            Swal.close();
             const order = res.data;
             $('#order_status_badge').html(`
                 ${
@@ -173,6 +182,42 @@ $(document).on('click', '.btn-edit-order', function() {
                     : ''
                 }
             `);
+            $('.modal-footer').html(`
+                ${
+                    order.shipping_status === "CREATED"
+                    ? `
+                        <button type="button" class="btn btn-light-primary" data-dismiss="modal">Huỷ</button>
+                        <button id="btn_save_edit" data-next="PICKING"
+                            style="background:#0ea5e9;border:none"
+                            class="btn-update-status btn text-white">Đang lấy hàng <i style="color:white" class="fas fa-arrow-right mx-2"></i></button>
+                    `
+
+                    : order.shipping_status === "PICKING"
+                    ? `
+                        <button type="button" class="btn btn-light-primary" data-dismiss="modal">Huỷ</button>
+                        <button id="btn_save_edit" data-next="PICKED"
+                            style="background:#6366f1;border:none"
+                            class="btn-update-status btn text-white">Đã lấy hàng <i style="color:white" class="fas fa-arrow-right mx-2"></i></button>
+                    `
+
+                    : order.shipping_status === "PICKED"
+                    ? `
+                        <button type="button" class="btn btn-light-primary" data-dismiss="modal">Huỷ</button>
+                        <button id="btn_save_edit" data-next="DELIVERING"
+                            style="background:#22c55e;border:none"
+                            class="btn-update-status btn text-white">Đang giao hàng <i style="color:white" class="fas fa-arrow-right mx-2"></i></button>
+                    `
+
+                    : order.shipping_status === "DELIVERING"
+                    ? `
+                        <button type="button" class="btn btn-light-primary" data-dismiss="modal">Huỷ</button>
+                        <button id="btn_save_edit" data-next="DELIVERED"
+                            style="background:#16a34a;border:none"
+                            class="btn-update-status btn text-white">Hoàn tất đơn hàng <i style="color:white" class="fas fa-arrow-right mx-2"></i></button>
+                    `
+                    : ''
+                }
+            `);
 
             $('#order_code_hidden').val(order.ghn_order_code);
             $('#current_shipping_status').val(order.shipping_status);
@@ -184,11 +229,21 @@ $(document).on('click', '.btn-edit-order', function() {
             $('#customer_address').val(order.to_ward_name + ', ' + order.to_district_name + ', ' + order.to_province_name);
             $('#required_note').val(order.required_note);
             $('#exampleModalCenter').modal('show');
+        },
+        error: function(err) {
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: err.responseJSON?.message,
+                confirmButtonText: 'Đóng'
+            });
+            console.error('Không thể tải thông tin chi tiết đơn hàng:', err);
         }
     });
 });
 
-$('#btn_save_edit').on('click', function() {
+$(document).on('click', '.btn-update-status', function () {
     const NEXT_STATUS_FLOW = {
         CREATED: 'PICKING',
         PICKING: 'PICKED',
@@ -231,13 +286,13 @@ $('#btn_save_edit').on('click', function() {
             Swal.close();
             Swal.fire({
                 icon: 'success',
-                title: 'Thành công!',
-                text: res.message,
+                title: 'Cập nhật trạng thái thành công',
                 timer: 1500,
                 showConfirmButton: false
+            }).then(() => {
+                $('#exampleModalCenter').modal('hide');
+                loadOrder();
             });
-            $('#exampleModalCenter').modal('hide');
-            loadOrder();
         },
         error: function(err) {
             Swal.close();
