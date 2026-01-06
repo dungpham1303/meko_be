@@ -124,7 +124,10 @@ content: `
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" id="modalContent">
                 <div class="modal-header">
-                    <h5 class="modal-title">Thông tin vận chuyển</h5>
+                    <div class="d-flex align-items-center">
+                        <h5 class="modal-title mr-3">Thông tin vận chuyển</h5>
+                        <div id="order_status_badge"></div>
+                    </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <i aria-hidden="true" class="ki ki-close"></i>
                     </button>
@@ -132,6 +135,7 @@ content: `
                 <div class="modal-body pt-1">
                     <form id="orderForm">
                         <input type="hidden" id="order_code_hidden">
+                        <input type="hidden" id="current_shipping_status">
                         <!-- KHỐI NGƯỜI BÁN -->
                         <div class="font-weight-bold pt-3 pr-3 pb-3">
                             THÔNG TIN NGƯỜI BÁN
@@ -182,24 +186,11 @@ content: `
                                 <input id="required_note" class="form-control" readonly>
                             </div>
                         </div>
-                        <!-- Trạng thái -->
-                        <div class="font-weight-bold pt-3 pr-3 pb-3">
-                            TRẠNG THÁI ĐƠN HÀNG
-                        </div>
-                        <select id="status_order_edit" class="form-control">
-                            <option value="CREATED">Đã tạo đơn</option>
-                            <option value="PICKING">Đang lấy hàng</option>
-                            <option value="PICKED">Đã lấy hàng</option>
-                            <option value="DELIVERING">Đang giao hàng</option>
-                            <option value="DELIVERED">Đã giao thành công</option>
-                            <option value="RETURN">Hoàn hàng</option>
-                            <option value="CANCEL">Đã huỷ</option>
-                        </select>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light-primary" data-dismiss="modal">Huỷ</button>
-                    <button id="btn_save_edit" type="button" class="btn btn-primary btn-save-add">Lưu</button>
+                    <button id="btn_save_edit" type="button" class="btn btn-primary btn-save-add">Cập nhật</button>
                 </div>
             </div>
         </div>

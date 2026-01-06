@@ -138,6 +138,7 @@ $(document).ready(function () {
 
 $(document).on('click', '.btn-edit-order', function() {
     const orderId = $(this).data('id');
+
     $.ajax({
         url: `/api/order/detail/${orderId}`,
         method: 'GET',
@@ -146,7 +147,35 @@ $(document).on('click', '.btn-edit-order', function() {
         },
         success: function (res) {
             const order = res.data;
+            $('#order_status_badge').html(`
+                ${
+                    order.shipping_status === "CREATED"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#3b82f6;color:white">Đã tạo đơn</span>'
+
+                    : order.shipping_status === "PICKING"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#0ea5e9;color:white">Đang lấy hàng</span>'
+
+                    : order.shipping_status === "PICKED"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#6366f1;color:white">Đã lấy hàng</span>'
+
+                    : order.shipping_status === "DELIVERING"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#22c55e;color:white">Đang giao hàng</span>'
+
+                    : order.shipping_status === "DELIVERED"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#16a34a;color:white">Đã giao thành công</span>'
+
+                    : order.shipping_status === "RETURN"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#f97316;color:white">Hoàn hàng</span>'
+
+                    : order.shipping_status === "CANCEL"
+                    ? '<span class="label label-pill label-inline mr-2" style="background-color:#ef4444;color:white">Đã huỷ</span>'
+
+                    : ''
+                }
+            `);
+
             $('#order_code_hidden').val(order.ghn_order_code);
+            $('#current_shipping_status').val(order.shipping_status);
             $('#shop_name').val(order.from_name);
             $('#shop_phone').val(order.from_phone);
             $('#shop_address').val(order.from_address);
@@ -154,18 +183,32 @@ $(document).on('click', '.btn-edit-order', function() {
             $('#customer_phone').val(order.customer_phone);
             $('#customer_address').val(order.to_ward_name + ', ' + order.to_district_name + ', ' + order.to_province_name);
             $('#required_note').val(order.required_note);
-            $('#status_order_edit').val(order.shipping_status);
             $('#exampleModalCenter').modal('show');
         }
     });
 });
 
 $('#btn_save_edit').on('click', function() {
+    const NEXT_STATUS_FLOW = {
+        CREATED: 'PICKING',
+        PICKING: 'PICKED',
+        PICKED: 'DELIVERING',
+        DELIVERING: 'DELIVERED'
+    };
     const orderCode = $('#order_code_hidden').val();
-    const status = $('#status_order_edit').val().toLowerCase();
+    const currentStatus = $('#current_shipping_status').val();
+    const nextStatus = NEXT_STATUS_FLOW[currentStatus];
+    if (!nextStatus) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Không thể cập nhật',
+            text: 'Trạng thái này không được phép cập nhật tiếp!'
+        });
+        return;
+    }
     const data = {
         order_code: orderCode,
-        status: status
+        status: nextStatus.toLowerCase()
     };
     Swal.fire({
         title: 'Đang xử lý...',
