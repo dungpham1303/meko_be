@@ -45,6 +45,7 @@ class OrderService {
   async createOrder(payload) {
     const {
       order_code,
+      post_id = null,
       seller_id = null,
       customer_id = null,
       customer_name,
@@ -97,6 +98,7 @@ class OrderService {
 
     const data = {
       order_code: code,
+      post_id,
       seller_id,
       customer_id,
       customer_name,

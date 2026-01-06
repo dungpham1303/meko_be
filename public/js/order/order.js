@@ -1,5 +1,3 @@
-
-
 let currentPage = 0;
 let pageSize = parseInt($('#page-size-selector').val());
 let orderCache = [];
