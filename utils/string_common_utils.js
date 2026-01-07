@@ -23,6 +23,7 @@ const stringCommonUtils={
                     p.updated_at as updatedAt,
                     p.ward_code as wardCode,
                     p.province_code as provinceCode,
+                    p.old_product_percent as oldProductPercent,
                     w.name as wardName,
                     pr.name as provinceName,
                     GROUP_CONCAT(DISTINCT ip.image_url) AS images,

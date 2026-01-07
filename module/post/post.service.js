@@ -44,7 +44,7 @@ class PostService{
         const images=post.images;
         const categories=post.categories;
         const paymentId=post.paymentId;
-        
+        const oldProductPercent=post.oldProductPercent;
         const user=await UserRepository.findByIdUserRepo(userId);
         if(!user){
             throw new Error('User not found');
@@ -90,6 +90,7 @@ class PostService{
             price:post.price,
             expired_at: expiredAtFormatted,
             phone_number:phoneNumber,
+            old_product_percent: oldProductPercent ?? 90
         }
         const postResult=await PostRepository.createPostRepo(postSave);
         if(!postResult) return;
@@ -278,6 +279,7 @@ class PostService{
             ward_code: post.wardCode ?? postExists.ward_code,
             province_code: post.provinceCode ?? postExists.province_code,
             phone_number: post.phoneNumber ?? postExists.phone_number,
+            old_product_percent: post.oldProductPercent ?? postExists.old_product_percent,
         };
 
         // Ảnh
