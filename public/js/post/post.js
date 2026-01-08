@@ -59,21 +59,26 @@ function loadPost(page=0, size=pageSize,searchText = '',status = inputStatus) {
                         <td>${post.title}</td>
                         <td>${post.description}</td>
                         <td>${post.address}</td>
+                        <td>
+                            <span class="badge-dynamic ${post.oldProductPercent >= 50 ? 'hot' : post.oldProductPercent >= 18 ? 'medium' : 'low'}">
+                                ${post.oldProductPercent || 0}%
+                            </span>
+                        </td>
                         <td>${post.price}</td>
                         <td>
                             ${
                                 post.status === "EXPIRED" 
-                                ? '<span class="label label-pill label-inline mr-2" style="background-color: #CC66FF;">Hết hạn</span>'
+                                ? '<span class="label label-pill label-inline mr-2 badge-dynamic" style="background-color: #CC66FF;">Hết hạn</span>'
                                 : post.status === "VIOLATION" 
-                                ? '<span class="label label-danger label-pill label-inline mr-2">Vi phạm</span>'
+                                ? '<span class="label label-danger label-pill label-inline mr-2 badge-dynamic">Vi phạm</span>'
                                 : post.status === "APPROVED"
-                                ? '<span class="label label-success label-pill label-inline mr-2">Phê duyệt</span>'
+                                ? '<span class="label label-success label-pill label-inline mr-2 badge-dynamic">Phê duyệt</span>'
                                 : post.status === "PENDING"
-                                ? '<span class="label label-primary label-pill label-inline mr-2">Chờ duyệt</span>'
+                                ? '<span class="label label-primary label-pill label-inline mr-2 badge-dynamic">Chờ duyệt</span>'
                                 : post.status === "HIDDEN"
-                                ? '<span class="label label-secondary label-pill label-inline mr-2">Ẩn tin</span>'
+                                ? '<span class="label label-secondary label-pill label-inline mr-2 badge-dynamic">Ẩn tin</span>'
                                 : post.status === "REJECTED"
-                                ? '<span class="label label-warning label-pill label-inline mr-2">Từ chối</span>'
+                                ? '<span class="label label-warning label-pill label-inline mr-2 badge-dynamic">Từ chối</span>'
                                 : ''
                             }
                         </td>
@@ -81,8 +86,8 @@ function loadPost(page=0, size=pageSize,searchText = '',status = inputStatus) {
                         <td>
                             ${
                                 post.isPinned == 1
-                                ? '<span class="label label-success label-pill label-inline mr-2">Đã ghim</span>'
-                                : '<span class="label label-danger label-pill label-inline mr-2">Chưa ghim</span>'
+                                ? '<span class="label label-success label-pill label-inline mr-2 badge-dynamic">Đã ghim</span>'
+                                : '<span class="label label-danger label-pill label-inline mr-2 badge-dynamic">Chưa ghim</span>'
                             }
                         </td>
                         <td style="text-align: center;padding-left:0;">

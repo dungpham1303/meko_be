@@ -1,12 +1,14 @@
 let currentPage = 0;
 let pageSize = parseInt($('#page-size-selector').val());
 let orderCache = [];
+let inputStatus = $('#input_search_status').val();
+
 
 function formatMoney(value) {
     return Math.floor(Number(value)).toLocaleString('en-US');
 }
 
-function loadOrder() {
+function loadOrder(status = inputStatus) {
     Swal.fire({
         title: 'Đang xử lý...',
         allowOutsideClick: false,
@@ -18,7 +20,7 @@ function loadOrder() {
     });
 
     $.ajax({
-        url: `/api/order/list/?orderBy=created_at&sort=DESC&limit=999999`,
+        url: `/api/order/list/?orderBy=created_at&sort=DESC&limit=999999&shipping_status=${status}`,
         method: 'GET',
         headers: {
             'Authorization': sessionStorage.getItem('token')
@@ -303,4 +305,17 @@ $(document).on('click', '.btn-update-status', function () {
             console.error('Không thể cập nhật trạng thái đơn hàng:', err);
         }
     });
-})
+});
+
+$(document).on('click', '#kt_search_4', function(e) {
+    e.preventDefault();
+
+    const status = $('#input_search_status').val();
+    loadOrder(status);
+});
+
+$(document).on('click', '#kt_reset_4', function(e) {
+    e.preventDefault();
+    $('#input_search_status').val('');
+    loadOrder();
+});

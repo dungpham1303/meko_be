@@ -1,6 +1,19 @@
 <%- include('../master', { title: 'Danh sách danh mục', 
 content: `
     <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .badge-dynamic{
+            padding:5px 12px;
+            border-radius:12px;
+            color:#fff;
+            font-weight:700;
+            font-size:13px;
+        }
+        .badge-dynamic.low{background:#3b82f6;}
+        .badge-dynamic.medium{background:#f59e0b;}
+        .badge-dynamic.hot{background:#ef4444;}
+
+    </style>
     <div class="d-flex flex-column-fluid">
         <!--begin::Container-->
         <div class="container" style="max-width: 2400px;">
@@ -79,6 +92,7 @@ content: `
                                     <th>Tiêu đề</th>
                                     <th>Mô tả</th>
                                     <th>Địa chỉ</th>
+                                    <th>Độ cũ</th>
                                     <th>Giá</th>
                                     <th>Trạng thái</th>
                                     <th>Ngày hết hạn</th>

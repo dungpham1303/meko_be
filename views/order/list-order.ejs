@@ -10,36 +10,34 @@ content: `
                     <div class="card-title">
                         <h3 class="card-label">Danh sách đơn hàng</h3>
                     </div>
-                    <div class="card-toolbar">
-                        <!--begin::Dropdown-->
-                        <div class="dropdown dropdown-inline mr-2">
-                            <button type="button" class="btn-add-category btn btn-primary font-weight-bolder">
-                                <span class="svg-icon svg-icon-md"></span>Thêm mới
-                            </button>
-                        </div>
-                        <!--end::Dropdown-->
-                    </div>
+                    
                 </div>
                 <div class="card-body">
                     <form class="mb-10">
                         <div class="row">
-                            <div class="form-group col-12 col-sm-6 col-lg-3">
+                            <div class="form-group col-12 col-sm-6 col-lg-5">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">
-                                            <i class="la la-search"></i>
+                                            <i class="la la-th-list"></i>
                                         </span>
                                     </div>
-                                    <input 
-                                        type="text" 
-                                        id="input_search" 
-                                        name="input_search" 
-                                        class="form-control search-input" 
-                                        placeholder="Tìm kiếm..."
-                                    >
+                                    <select 
+                                        id="input_search_status" 
+                                        name="input_search_status" 
+                                        class="form-control">
+                                        <option value="">-- Chọn trạng thái --</option>
+                                        <option value="CREATED">Tạo đơn</option>
+                                        <option value="PICKING">Đang lấy hàng</option>
+                                        <option value="PICKED">Đã lấy hàng</option>
+                                        <option value="DELIVERING">Đang giao hàng</option>
+                                        <option value="DELIVERED">Đã giao hàng</option>
+                                        <option value="RETURN">Hoàn hàng</option>
+                                        <option value="CANCEL">Huỷ đơn</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="col-lg-9 col-sm-6 col-12">
+                            <div class="col-lg-7 col-sm-6 col-12">
                                 <button class="btn btn-primary btn-primary--icon" id="kt_search_4">
                                     <span>
                                         <i class="la la-search"></i>
