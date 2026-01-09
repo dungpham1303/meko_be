@@ -222,9 +222,18 @@ const renderColumnChart = (categories = [], values = []) => {
         },
         dataLabels: { enabled: false },
         stroke: { show: true, width: 2, colors: ['transparent'] },
-        xaxis: { categories: categories },
+        xaxis: { 
+            categories: categories,
+            title: { text: 'Thời gian', style: { fontWeight: 'bold' } } // TRỤC HOÀNH
+        },
         yaxis: {
-            title: { text: 'Doanh thu (VNĐ)', style: { fontSize: '12px', fontWeight: 'normal' } }
+            title: { 
+                text: 'Số tiền (VNĐ)', 
+                style: { fontWeight: 'bold' } 
+            }, // TRỤC TUNG
+            labels: {
+                formatter: val => val.toLocaleString('vi-VN') + ' đ'
+            }
         },
         fill: { opacity: 1 },
         tooltip: { y: { formatter: val => val } },
@@ -258,7 +267,21 @@ const renderLineChart = (categories = [], values = []) => {
         grid: {
             row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 }
         },
-        xaxis: { categories: categories },
+        xaxis: { 
+            categories: categories,
+            title: { text: 'Thời gian', style: { fontWeight: 'bold' } } // TRỤC HOÀNH
+        },
+        yaxis: {
+            title: { 
+                text: 'Số lượng người dùng', 
+                style: { fontWeight: 'bold' } 
+            }, // TRỤC TUNG
+            min: 0,
+            forceNiceScale: true,
+            labels: {
+                formatter: val => Math.trunc(val)
+            }
+        },
         colors: [COLORS.primary],
         title: {
             text: 'Thống kê người dùng mới',
