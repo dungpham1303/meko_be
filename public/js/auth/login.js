@@ -15,6 +15,7 @@ $('#btn_login').on('click', function (e) {
       if (res.success) {
         if (res.data.role == 1) {
           sessionStorage.setItem('token', res.data.token);
+          sessionStorage.setItem('username', res.data.username);
           sessionStorage.setItem('refreshToken', res.data.refreshToken);
           window.location.href = '/admin/dashboard';
         } else {
