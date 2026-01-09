@@ -60,7 +60,7 @@ function loadPost(page=0, size=pageSize,searchText = '',status = inputStatus) {
                         <td>${post.description}</td>
                         <td>${post.address}</td>
                         <td>
-                            <span class="badge-dynamic ${post.oldProductPercent >= 50 ? 'hot' : post.oldProductPercent >= 18 ? 'medium' : 'low'}">
+                            <span class="badge-dynamic ${post.oldProductPercent >= 50 ? 'low' : post.oldProductPercent >= 18 ? 'medium' : 'hot'}">
                                 ${post.oldProductPercent || 0}%
                             </span>
                         </td>
