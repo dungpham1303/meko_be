@@ -1,9 +1,12 @@
 import PaymentPackagesService from "./payment.packages.service.js";
 import ResponseUtils from "../../utils/response_utils.js";
+import UserRepository from "../users/user.repository.js";
+import userRepository from "../users/user.repository.js";
 
 const createController = async (req, res) => {
     try {
         const paymentPackage = req.body;
+        await userRepository.findById(9);
         const result = await PaymentPackagesService.createPaymentPackage(paymentPackage);
         return ResponseUtils.successResponse(res, null,'Tạo gói thanh toán thành công');
     } catch (error) {

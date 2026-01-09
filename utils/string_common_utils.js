@@ -24,6 +24,9 @@ const stringCommonUtils={
                     p.ward_code as wardCode,
                     p.province_code as provinceCode,
                     p.old_product_percent as oldProductPercent,
+                    pu.id as paymentUsageId,
+                    pu.post_id as usagePostId,
+                    pu.used_at as usageUsedAt,
                     w.name as wardName,
                     pr.name as provinceName,
                     GROUP_CONCAT(DISTINCT ip.image_url) AS images,
@@ -41,10 +44,25 @@ const stringCommonUtils={
                     wards w on p.ward_code=w.code           
                 left join 
                     provinces pr on p.province_code=pr.code       
+                left join 
+                    (
+                        select pu_final.*
+                        from payment_usages pu_final
+                        inner join (
+                            select post_id, max(used_at) as max_used_at
+                            from payment_usages
+                            group by post_id
+                        ) m on m.post_id = pu_final.post_id and pu_final.used_at = m.max_used_at
+                        inner join (
+                            select post_id, used_at, max(id) as max_id
+                            from payment_usages
+                            group by post_id, used_at
+                        ) mx on mx.post_id = pu_final.post_id and mx.used_at = pu_final.used_at and mx.max_id = pu_final.id
+                    ) pu on pu.post_id = p.id
                 ${whereClause}
                 GROUP BY 
                     p.id, p.user_id, p.title, p.description, p.price, p.address, 
-                    p.status, p.expired_at, p.is_pinned, p.rating, p.created_at, p.updated_at`
+                    p.status, p.expired_at, p.is_pinned, p.rating, p.created_at, p.updated_at, pu.id, pu.post_id, pu.used_at`
     }
 }
 export default stringCommonUtils;
