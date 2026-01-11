@@ -215,6 +215,22 @@ $(document).ready(function() {
                 'Authorization': sessionStorage.getItem('token')
             },
             success: function(res) {
+                const pkgName = res.data.packageName || '';
+                const paymentExpiredAt = res.data.paymentExpiredAt || '';
+                const isExpired = typeof res.data.isExpired !== 'undefined' ? (Number(res.data.isExpired) === 1 ? 'Hết hạn' : 'Còn hạn') : '';
+                const activePkgs = Array.isArray(res.data.activePackages) ? res.data.activePackages : [];
+                const activePkgHtml = activePkgs.length
+                    ? activePkgs.map((p, idx) => `
+                        <div class="border rounded p-3 mb-2">
+                            <div><strong>Gói:</strong> ${p.packageName ?? ''}</div>
+                            <div><strong>Mã gói:</strong> ${p.packageId ?? ''}</div>
+                            <div><strong>Payment ID:</strong> ${p.paymentId ?? ''}</div>
+                            <div><strong>Hết hạn:</strong> ${p.expiredAt ?? ''}</div>
+                            <div><strong>Số lượt còn lại:</strong> ${p.usageRemaining ?? ''}</div>
+                        </div>
+                      `).join('')
+                    : '<div>Không có gói đang hoạt động</div>';
+
                 const htmlEdit = `
                     <div class="modal-header">
                         <h5 class="modal-title">Chỉnh sửa thông tin người dùng</h5>
@@ -255,6 +271,20 @@ $(document).ready(function() {
                                     <option value="1" ${res.data.is_active == 1 ? 'selected' : ''}>Hoạt động</option>
                                     <option value="0" ${res.data.is_active == 0 ? 'selected' : ''}>Đã khoá</option>
                                 </select>
+                            </div>
+
+                            <hr/>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Thông tin gói:</label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2"><strong>Tên gói:</strong> ${pkgName}</div>
+                                    <div class="col-md-6 mb-2"><strong>Hạn thanh toán:</strong> ${paymentExpiredAt}</div>
+                                    <div class="col-md-6 mb-2"><strong>Trạng thái:</strong> ${isExpired}</div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="mb-2"><strong>Các gói đang hoạt động:</strong></div>
+                                    ${activePkgHtml}
+                                </div>
                             </div>
                         </form>
                     </div>
