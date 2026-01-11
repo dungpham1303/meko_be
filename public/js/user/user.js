@@ -11,6 +11,27 @@ function formatDate(isoString) {
     return `${day}/${month}/${year}`;
 }
 
+// Format to dd/MM/yyyy, robust for both "YYYY-MM-DD HH:mm:ss" and ISO strings
+function formatDateDMY(value) {
+    if (!value) return '';
+    const s = String(value);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+        const yyyy = m[1];
+        const mm = m[2];
+        const dd = m[3];
+        return `${dd}/${mm}/${yyyy}`;
+    }
+    const d = new Date(s);
+    if (!isNaN(d)) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+    return '';
+}
+
 function loadUsers(page = 0, size = pageSize, searchText = '') {
     Swal.fire({
         title: 'Đang xử lý...',
@@ -216,7 +237,7 @@ $(document).ready(function() {
             },
             success: function(res) {
                 const pkgName = res.data.packageName || '';
-                const paymentExpiredAt = res.data.paymentExpiredAt || '';
+                const paymentExpiredAt = formatDateDMY(res.data.paymentExpiredAt) || '';
                 const isExpired = typeof res.data.isExpired !== 'undefined' ? (Number(res.data.isExpired) === 1 ? 'Hết hạn' : 'Còn hạn') : '';
                 const activePkgs = Array.isArray(res.data.activePackages) ? res.data.activePackages : [];
                 const activePkgHtml = activePkgs.length
@@ -225,7 +246,7 @@ $(document).ready(function() {
                             <div><strong>Gói:</strong> ${p.packageName ?? ''}</div>
                             <div><strong>Mã gói:</strong> ${p.packageId ?? ''}</div>
                             <div><strong>Payment ID:</strong> ${p.paymentId ?? ''}</div>
-                            <div><strong>Hết hạn:</strong> ${p.expiredAt ?? ''}</div>
+                            <div><strong>Hết hạn:</strong> ${formatDateDMY(p.expiredAt) ?? ''}</div>
                             <div><strong>Số lượt còn lại:</strong> ${p.usageRemaining ?? ''}</div>
                         </div>
                       `).join('')
