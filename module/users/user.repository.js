@@ -103,6 +103,60 @@ class UserRepository extends BaseService{
 
         return await this.paginateRawQuery(baseQuery, page, size, params);
     }
+
+    async findDetailWithPayment(userId){
+        const sql = `
+            SELECT 
+                u.id,
+                u.username,
+                u.email,
+                u.address_name AS addressName,
+                u.avatar,
+                u.is_active AS isActive,
+                u.created_at AS createdAt,
+                pp.name AS packageName,
+                pay.expired_at AS paymentExpiredAt,
+                CASE WHEN pay.expired_at IS NOT NULL AND pay.expired_at < NOW() THEN 1 ELSE 0 END AS isExpired,
+                COALESCE(ap.activePackages, JSON_ARRAY()) AS activePackages
+            FROM users u
+            LEFT JOIN (
+                SELECT pu_final.*
+                FROM payments pu_final
+                INNER JOIN (
+                    SELECT user_id, MAX(expired_at) AS max_expired_at
+                    FROM payments
+                    GROUP BY user_id
+                ) m ON m.user_id = pu_final.user_id AND pu_final.expired_at = m.max_expired_at
+                INNER JOIN (
+                    SELECT user_id, expired_at, MAX(id) AS max_id
+                    FROM payments
+                    GROUP BY user_id, expired_at
+                ) mx ON mx.user_id = pu_final.user_id AND mx.expired_at = pu_final.expired_at AND mx.max_id = pu_final.id
+            ) pay ON pay.user_id = u.id
+            LEFT JOIN payment_packages pp ON pp.id = pay.package_id
+            LEFT JOIN (
+                SELECT 
+                    p.user_id,
+                    COALESCE(JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'paymentId', p.id,
+                            'packageId', p.package_id,
+                            'packageName', pkg.name,
+                            'expiredAt', p.expired_at,
+                            'usageRemaining', p.usage_remaining
+                        )
+                    ), JSON_ARRAY()) AS activePackages
+                FROM payments p
+                INNER JOIN payment_packages pkg ON pkg.id = p.package_id
+                WHERE p.expired_at >= NOW()
+                GROUP BY p.user_id
+            ) ap ON ap.user_id = u.id
+            WHERE u.id = ?
+            LIMIT 1
+        `;
+        const rows = await this.rawQuery(sql, [userId]);
+        return rows && rows[0] ? rows[0] : null;
+    }
 }
 
 export default new UserRepository();

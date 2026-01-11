@@ -1,4 +1,5 @@
 import userService from './user.service.js';
+import UserRepository from './user.repository.js';
 import ResponseUtils from '../../utils/response_utils.js';
 import bcrypt from 'bcrypt';
 import ResponseUtil from "../../utils/response_utils.js";
@@ -20,7 +21,17 @@ const userController={
     async getDetailUser(req,res){
         try {
             const {id}=req.params;
-            const user=await userService.findByIdUser(id);
+            // Enrich detail with package info
+            const detail = await UserRepository.findDetailWithPayment(id);
+            if (!detail) {
+                return ResponseUtils.notFoundResponse(res,'Người dùng không tồn tại');
+            }
+            const user = {
+                ...detail,
+                address_name: detail.addressName ?? detail.address_name,
+                is_active: typeof detail.isActive !== 'undefined' ? detail.isActive : detail.is_active,
+                created_at: detail.createdAt ?? detail.created_at,
+            };
             return ResponseUtils.successResponse(res,user,'Lấy thông tin người dùng thành công');
         } catch (error) {
             console.log(error);
